@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Zero-JS Reactive Form</title>
+    <style>
+        /* 1. VARIABLES & THEMING */
+        :root {
+            --primary: #2563eb;
+            --error: #dc2626;
+            --success: #16a34a;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Light Mode (Default) */
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --btn-secondary: #ffffff;
+            --meter-bg: #eeeeee;
+        }
+
+        /* Dark Mode State via Checkbox Hack */
+        body:has(#theme-toggle:checked) {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --btn-secondary: #374151;
+            --meter-bg: #374151;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.4s ease;
+        }
+
+        /* 2. THEME TOGGLE BUTTON */
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        #theme-toggle { display: none; }
+
+        .switch-label {
+            width: 48px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .switch-label::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #theme-toggle:checked + .switch-label {
+            background-color: var(--primary);
+        }
+
+        #theme-toggle:checked + .switch-label::after {
+            transform: translateX(24px);
+        }
+
+        /* 3. FORM CARD STYLING */
+        .login-card {
+            background: var(--bg-card);
+            width: 320px;
+            padding: 30px;
+            border-radius: 1.25rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+
+        .login-card legend {
+			padding:0;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .parent { width: 100%; display: flex; flex-direction: column; }
+
+        /* 4. INPUT GROUPS & FLOATING LABELS */
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0 12px 8px;
+            transition: var(--transition);
+        }
+
+        .label-text {
+            font-size: 0.75rem;
+            font-weight: 700;
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            color: var(--text-muted);
+        }
+
+        /* Show label when input is not empty */
+        .field-group:has(.in:not(:placeholder-shown)) .label-text {
+            max-width: 100%;
+            opacity: 1;
+            visibility: visible;
+            padding: 2px 4px;
+            color: var(--primary);
+        }
+
+        .in {
+            border: none;
+            outline: none;
+            padding: 8px 0;
+            font-size: 1rem;
+            width: 100%;
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        /* Validation States */
+        .parent:has(.in:focus) .field-group { border-color: var(--primary); }
+        .parent:has(.in:not(:placeholder-shown):valid) .field-group { border-color: var(--success); }
+        .parent:has(.in:not(:placeholder-shown):invalid) .field-group { border-color: var(--error); }
+
+        .alert-msg {
+            font-size: 0.7rem;
+            color: var(--error);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: var(--transition);
+            padding-left: 4px;
+        }
+
+        .parent:has(.in:invalid:not(:placeholder-shown)) .alert-msg {
+            max-height: 50px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        /* 5. PASSWORD STRENGTH METER */
+        .meter-container {
+            width: 100%;
+            height: 6px;
+            background: var(--meter-bg);
+            border-radius: 10px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: var(--strength-w, 0%);
+            background: var(--strength-c, #ccc);
+            transition: width 0.6s ease, background 0.6s ease;
+        }
+
+        /* Strength Logic: Weak vs Strong */
+        .password-wrapper:has(.in:not(:placeholder-shown)) {
+            --strength-w: 35%;
+            --strength-c: var(--error);
+        }
+        .password-wrapper:has(.in:valid) {
+            --strength-w: 100%;
+            --strength-c: var(--success);
+        }
+
+        /* 6. BUTTONS */
+        .btn-row { display: flex; gap: 12px; margin-top: 10px; }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            border: 1px solid var(--border-color);
+            background: var(--btn-secondary);
+            color: var(--text-main);
+        }
+
+        button[type="submit"] {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        button:hover { filter: brightness(90%); }
+        button:active { transform: scale(0.96); }
+    </style>
+</head>
+<body>
+
+    <div class="theme-switch">
+        <span>Light</span>
+        <input type="checkbox" id="theme-toggle">
+        <label for="theme-toggle" class="switch-label"></label>
+        <span>Dark</span>
+    </div>
+
+    <form oninput="result.value = 'user: '+name.value +', pass: '+ password.value">
+        <fieldset class="login-card">
+            <legend>Login</legend>
+
+            <div class="parent">
+                <fieldset class="field-group">
+                    <legend class="label-text">Username</legend>
+                    <input class="in" id="name" type="text" placeholder="Username" required 
+                           pattern="^[a-zA-Z0-9]{5,12}$" autocomplete="off">
+                </fieldset>
+                <div class="alert-msg">Use 5-12 alphanumeric characters.</div>
+            </div>
+
+            <div class="parent password-wrapper">
+                <fieldset class="field-group">
+                    <legend class="label-text">Password</legend>
+                    <input class="in" id="password" type="password" placeholder="Password" required 
+                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" autocomplete="off">
+                </fieldset>
+                
+                <div class="meter-container">
+                    <div class="meter-fill"></div>
+                </div>
+                
+                <div class="alert-msg">Needs 8+ chars, 1 Uppercase, and 1 Number.</div>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit">Sign In</button>
+                <button type="reset">Clear</button>
+            </div>
+        </fieldset>
+		<output name="result" for="name"/>
+    </form>
+	
+	
+</body>
+</html>
