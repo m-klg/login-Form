@@ -241,6 +241,9 @@
 		form:invalid .clear-button::after { content:'Clear' }
 		
 		
+		
+
+		
     </style>
 </head>
 <body>
@@ -251,7 +254,7 @@
         <span>Dark</span>
     </div>
 
-    <form oninput="result.value = 'user: '+name.value +', pass: '+ password.value; clearBtn.disabled = this.checkValidity()">
+    <form oninput="result.value = 'user: '+name.value +', pass: '+ password.value; this.clearBtn.disabled = this.checkValidity()">
         <fieldset class="login-card">
             <legend>Login</legend>
 
@@ -264,7 +267,17 @@
                 <div class="alert-msg">Use 5-12 alphanumeric characters.</div>
             </div>
 
-            <div class="parent password-wrapper">
+		<div class="parent">
+            <div class="field-group">
+                <label class="label-text" for="email">Email</label>
+                <input class="in" id="email" type="email" placeholder="Email" required autocomplete="off">
+            </div>
+            <div class="alert-msg">Email</div>
+        </div>
+        
+
+
+		<div class="parent password-wrapper">
                 <fieldset class="field-group">
                     <legend class="label-text">Password</legend>
                     <input class="in" id="password" type="password" placeholder="Password" required 
@@ -277,6 +290,10 @@
                 
                 <div class="alert-msg">Needs 8+ chars, 1 Uppercase, and 1 Number.</div>
             </div>
+			
+			
+		
+			
 
             <div class="btn-row" >
                 <button type="submit" class='submit-button'>Sign In</button>
@@ -284,6 +301,7 @@
                 <button type="reset"  class='clear-button'  name='clearBtn'></button>
             </div>
         </fieldset>
+		
 		<output name="result" for="name"></output>
     </form>
 	</body>
