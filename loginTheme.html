@@ -237,10 +237,13 @@
 		.submit-button-disabled { display: block; opacity: 0.5; cursor: not-allowed; }
 		form:valid .submit-button-disabled { display: none; }
 		
+		form:valid .clear-button::after { content:'Congratulations!' }
+		form:invalid .clear-button::after { content:'Clear' }
+		
+		
     </style>
 </head>
 <body>
-
     <div class="theme-switch">
         <span>Light</span>
         <input type="checkbox" id="theme-toggle">
@@ -248,7 +251,7 @@
         <span>Dark</span>
     </div>
 
-    <form oninput="result.value = 'user: '+name.value +', pass: '+ password.value">
+    <form oninput="result.value = 'user: '+name.value +', pass: '+ password.value; clearBtn.disabled = this.checkValidity()">
         <fieldset class="login-card">
             <legend>Login</legend>
 
@@ -275,15 +278,13 @@
                 <div class="alert-msg">Needs 8+ chars, 1 Uppercase, and 1 Number.</div>
             </div>
 
-            <div class="btn-row">
+            <div class="btn-row" >
                 <button type="submit" class='submit-button'>Sign In</button>
 				<button type="submit" class='submit-button-disabled' disabled >Fill Form to Sign In</button>				
-                <button type="reset">Clear</button>
+                <button type="reset"  class='clear-button'  name='clearBtn'></button>
             </div>
         </fieldset>
 		<output name="result" for="name"></output>
     </form>
-	
-	
-</body>
+	</body>
 </html>
