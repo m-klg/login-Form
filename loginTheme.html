@@ -226,6 +226,14 @@
 
         button:hover { filter: brightness(90%); }
         button:active { transform: scale(0.96); }
+		
+		
+		form:invalid .submit-button{
+			opacity: 0.5;
+			pointer-events: none;
+			cursor: not-allowed;
+		}
+		
     </style>
 </head>
 <body>
@@ -265,11 +273,11 @@
             </div>
 
             <div class="btn-row">
-                <button type="submit">Sign In</button>
+                <button type="submit" class='submit-button'>Sign In</button>
                 <button type="reset">Clear</button>
             </div>
         </fieldset>
-		<output name="result" for="name"/>
+		<output name="result" for="name"></output>
     </form>
 	
 	
