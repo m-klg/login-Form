@@ -228,11 +228,14 @@
         button:active { transform: scale(0.96); }
 		
 		
-		form:invalid .submit-button{
-			opacity: 0.5;
-			pointer-events: none;
-			cursor: not-allowed;
-		}
+		
+		/* Real button logic */
+		.submit-button { display: none; }
+		form:valid .submit-button { display: block; }
+
+		/* Placeholder button logic */
+		.submit-button-disabled { display: block; opacity: 0.5; cursor: not-allowed; }
+		form:valid .submit-button-disabled { display: none; }
 		
     </style>
 </head>
@@ -274,6 +277,7 @@
 
             <div class="btn-row">
                 <button type="submit" class='submit-button'>Sign In</button>
+				<button type="submit" class='submit-button-disabled' disabled >Fill Form to Sign In</button>				
                 <button type="reset">Clear</button>
             </div>
         </fieldset>
